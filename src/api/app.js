@@ -1,48 +1,25 @@
-const express = require('express');
-const path = require('path');
-const favicon = require('serve-favicon');
-const logger = require('morgan');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
+'use strict';
 
-const index = require('./routes/index');
-const users = require('./routes/users');
-const campaigns = require('./routes/campaigns');
+var SwaggerExpress = require('swagger-express-mw');
+var app = require('express')();
+module.exports = app; // for testing
 
-const app = express();
+var config = {
+  appRoot: __dirname + '/../'// required config
+};
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+console.log(config.appRoot);
 
-// uncomment after placing your favicon in /public
-// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+SwaggerExpress.create(config, function(err, swaggerExpress) {
+  if (err) { throw err; }
 
-app.use('/', index);
-app.use('/users', users);
-app.use('/campaigns', campaigns);
+  // install middleware
+  swaggerExpress.register(app);
 
-// catch 404 and forward to error handler
-app.use((req, res, next) => {
-  const err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  var port = process.env.PORT || 10010;
+  app.listen(port);
+
+  if (swaggerExpress.runner.swagger.paths['/hello']) {
+    console.log('try this:\ncurl http://127.0.0.1:' + port + '/hello?name=Scott');
+  }
 });
-
-// error handler
-app.use((err, req, res, next) => {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-module.exports = app;
