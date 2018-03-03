@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "src/api"
+		},
+		{
+			"path": "src/fe"
+		}
+	],
+	"settings": {}
+}
